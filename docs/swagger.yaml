@@ -1,0 +1,75 @@
+basePath: /
+definitions:
+  GetStats:
+    properties:
+      processed:
+        type: integer
+      total:
+        type: integer
+    type: object
+  MessageJSON:
+    properties:
+      data: {}
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Api server to send messages to Kafka broker
+  title: Api to Send Messages to Kafka
+  version: "1.0"
+paths:
+  /getstat:
+    get:
+      consumes:
+      - application/json
+      description: Get statistics on messages
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response with total and processed messages count
+          schema:
+            $ref: '#/definitions/GetStats'
+        "500":
+          description: something went wrong
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Request statistic
+      tags:
+      - stats
+  /message:
+    post:
+      consumes:
+      - application/json
+      description: Gets message from user and returns the status 200, 400, 500, based
+        on the response.
+      parameters:
+      - description: The JSON payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/MessageJSON'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Message received successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: msg format wrong
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: msg format wrong
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get message from user
+      tags:
+      - message
+swagger: "2.0"

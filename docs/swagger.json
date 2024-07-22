@@ -1,0 +1,111 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Api server to send messages to Kafka broker",
+        "title": "Api to Send Messages to Kafka",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/getstat": {
+            "get": {
+                "description": "Get statistics on messages",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stats"
+                ],
+                "summary": "Request statistic",
+                "responses": {
+                    "200": {
+                        "description": "Successful response with total and processed messages count",
+                        "schema": {
+                            "$ref": "#/definitions/GetStats"
+                        }
+                    },
+                    "500": {
+                        "description": "something went wrong",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/message": {
+            "post": {
+                "description": "Gets message from user and returns the status 200, 400, 500, based on the response.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "message"
+                ],
+                "summary": "Get message from user",
+                "parameters": [
+                    {
+                        "description": "The JSON payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/MessageJSON"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Message received successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "msg format wrong",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "msg format wrong",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "GetStats": {
+            "type": "object",
+            "properties": {
+                "processed": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "MessageJSON": {
+            "type": "object",
+            "properties": {
+                "data": {}
+            }
+        }
+    }
+}

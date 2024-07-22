@@ -1,0 +1,110 @@
+{{template "base" .}}
+
+{{define "content" }}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1 class="mt-5">Test microservice</h1>
+                <p>Данный тестовый проект передает информацию в брокер сообщений Kafka и обрабатыает её.</p>
+                <p>напишите сообщение в поле Sent и нажмите кнопку Send Message</p>
+                <p>По кнопке Get Stats, можно проверить колличество обработанных сообщений.</p>
+                <p>Кнопка Swagger Documentation покажет вам документацию формате Swagger</p>
+                <hr>
+                <a id="brokerBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Send Message</a>
+                <a id="statsBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Get Stats</a>
+                <a class="btn btn-outline-secondary" href="/swagger/index.html">Swagger Documentation</a>
+                <div id="output" class="mt-5" style="outline: 1px solid silver; padding: 2em;">
+                    <span class="text-muted">Output shows here...</span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <h4 class="mt-5">Sent</h4>
+                <div class="mt-1" style="outline: 1px solid silver; padding: 2em;">
+                    <input type="text" id="payload" class="text-muted" placeholder="Введите сообщение тут...">
+                </div>
+            </div>
+            <div class="col">
+                <h4 class="mt-5">Received</h4>
+                <div class="mt-1" style="outline: 1px solid silver; padding: 2em;">
+                    <pre id="received"><span class="text-muted">Ничего еще не получено...</span></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+{{end}}
+
+{{define "js"}}
+    <script>
+    let brokerBtn = document.getElementById("brokerBtn");
+    let statsBtn = document.getElementById("statsBtn")
+    let output = document.getElementById("output");
+    let payloadInput = document.getElementById("payload");
+    let received = document.getElementById("received");
+
+    brokerBtn.addEventListener("click", function() {
+        const payloadValue = payloadInput.value;
+
+        const body = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                topic: "RequestTopic",
+                data: payloadValue,
+            })
+        };
+
+        fetch("/message", body)
+        .then((response) => response.json())
+        .then((data) => {
+            output.innerHTML = "Post request sent";
+            received.innerHTML = JSON.stringify(data, undefined, 4);
+            if (data.error) {
+                console.log(data.message);
+            } else {
+                output.innerHTML += `<br><strong>Response from microsevice service</strong>: ${data.message}`;
+            }
+        })
+        .catch((error) => {
+            if (error.response) {
+                // Попытка извлечь JSON из ответа
+                error.response.json().then((errorData) => {
+                    output.innerHTML += "<br><br>Error: " + (errorData.message || "Произошла ошибка");
+                    received.innerHTML = "Ошибка: " + (errorData.message || "Произошла ошибка");
+                }).catch(() => {
+                    // Если тело ответа не является JSON или другая ошибка чтения
+                    output.innerHTML += "<br><br>Error: Не удалось обработать ответ ошибки";
+                    received.innerHTML = "Ошибка: Не удалось обработать ответ ошибки";
+                });
+            } else {
+                // Ошибка не связана с HTTP-ответом (например, сетевая ошибка)
+                output.innerHTML += "<br><br>Error: " + error;
+                received.innerHTML = "Ошибка: " + error.message;
+            }
+        });
+    });
+
+    statsBtn.addEventListener("click", function() {
+        fetch("/getstat", {
+            method: 'GET',
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            output.innerHTML = "Reques for statitistic sent";
+            received.innerHTML = JSON.stringify(data, undefined, 2);
+            if (data.error) {
+                console.log(data.message);
+            } else {
+                output.innerHTML += `<br><strong>Response from microservice service</strong>: ${data.message}`;
+            }
+        })
+        .catch((error) => {
+            output.innerHTML += "<br><br>Error: " + error; 
+        });
+    
+    });
+    </script>
+{{end}}

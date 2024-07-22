@@ -1,0 +1,55 @@
+services:
+
+  postgres:
+    image: 'postgres:15.0'
+    ports:
+      - "5432:5432"
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=messages
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - ./data/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka_data:/kafka
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_CREATE_TOPICS: "RequestTopic:1:1,ResponseTopic:1:1"
+    depends_on:
+      - zookeeper
+
+  kafka-service:
+    build:
+      context: .
+      dockerfile: kafka-service.dockerfile
+    restart: always
+    ports:
+      - "8080:8080"
+    deploy:
+      mode: replicated
+      replicas: 1
+      
+volumes:
+  zookeeper_data:
+  zookeeper_datalog:
+  kafka_data:
+  postgres_data:
