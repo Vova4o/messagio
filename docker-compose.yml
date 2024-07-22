@@ -31,6 +31,7 @@ services:
     volumes:
       - kafka_data:/kafka
     environment:
+      KAFKA_HEAP_OPTS: "-Xmx256M -Xms128M"
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_HOST_NAME: kafka
       KAFKA_CREATE_TOPICS: "RequestTopic:1:1,ResponseTopic:1:1"
