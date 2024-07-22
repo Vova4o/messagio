@@ -42,7 +42,7 @@
 
 Для запуска на своем компьютере необходимо скачать данный репозиторий
 
-`link to this repo`
+`git clone https://github.com/Vova4o/messagio.git`
 
 ### Установка
 
